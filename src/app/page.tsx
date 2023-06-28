@@ -36,6 +36,8 @@ export default function Home(): React.JSX.Element {
   const [filter, setFilter] = useState<boolean | null>(null)
   const [filterTasks, setFilterTasks] = useState<Task[]>([])
   const [isMounted, setItMounted] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
+
 
   useEffect(() => {
     setItMounted(true)
@@ -47,6 +49,13 @@ export default function Home(): React.JSX.Element {
   },[tasks])
 
   const handlerAdd = (task: string) => {
+    if (task === "") {
+      setError("Task Description cannot be empty");
+      setTimeout(() => {
+        setError(null)
+      }, 3000);
+      return
+    }
     const newTask: Task = {
       id: shortid.generate(),
       name:task,
@@ -87,17 +96,17 @@ export default function Home(): React.JSX.Element {
   }
 
   const handlerOrder = (param: DropResult) => {
-    const Isrc = param.source.index;
-    const Idst = param.destination?.index === undefined  ? Isrc : param.destination.index
+    const IndexSource = param.source.index;
+    const IndexDestiny = param.destination?.index === undefined  ? IndexSource : param.destination.index
 
     if (filter === null) {
-      changePosition(Isrc, Idst)
+      changePosition(IndexSource, IndexDestiny)
     } else {
-      const OrigenId = filterTasks[Isrc].id
-      const DestinoId = filterTasks[Idst].id
-      const RealIsrc = getIndexById(OrigenId, tasks)
-      const RealIdst = getIndexById(DestinoId, tasks)
-      changePosition(RealIsrc, RealIdst)
+      const IdSource = filterTasks[IndexSource].id
+      const IdDestiny = filterTasks[IndexDestiny].id
+      const RealIndexSource = getIndexById(IdSource, tasks)
+      const RealIndexDestiny = getIndexById(IdDestiny, tasks)
+      changePosition(RealIndexSource, RealIndexDestiny)
     }
   }
 
@@ -118,6 +127,7 @@ export default function Home(): React.JSX.Element {
   return (
     <main>
       <AddTask handlerTask={handlerAdd} />
+      {error && <p className="p-2 my-2 rounded-lg w-full text-black bg-red-400 text-center ">{error}</p>}      
      <DragDropContext 
      onDragEnd={(param) => handlerOrder(param)}>
          <Droppable droppableId="droppable-1">
